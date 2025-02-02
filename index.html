@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Викторина по квантовой физике</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 60%;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .question {
+            margin-bottom: 20px;
+        }
+        .answers {
+            list-style-type: none;
+            padding: 0;
+        }
+        .answers li {
+            margin: 10px 0;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #202020;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #000000;
+        }
+        #result {
+            display: none;
+            text-align: center;
+        }
+        .timer {
+            font-size: 20px;
+            text-align: center;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Викторина по квантовой физике</h1>
+
+    <!-- Таймер -->
+    <div class="timer" id="timer">Время: 10 секунд</div>
+
+    <div id="quiz">
+        <!-- Вопросы -->
+        <div class="question" id="question-container">
+            >
+        </div>
+        
+        <button onclick="calculateScore()">Показать результат</button>
+    </div>
+
+    <div id="result">
+        <h2>Ваш результат</h2>
+        <p>Правильных ответов: <span id="score"></span> из 15</p>
+    </div>
+</div>
+
+
+<audio id="correct-sound" src="c:\Users\user\Desktop\ib project 2024-2025\web\npm\correct-6033.mp3" preload="auto"></audio>
+<audio id="incorrect-sound" src="c:\Users\user\Desktop\ib project 2024-2025\web\npm\wrong-38598.mp3" preload="auto"></audio>
+<audio id="time-up-sound" src="time-up.mp3" preload="auto"></audio>
+
+<script>
+    let currentQuestionIndex = 0;
+    let score = 0;
+    const questions = [
+        {
+            question: "1. Кто является основателем квантовой теории?",
+            options: ["Исаак Ньютон", "Макс Планк", "Альберт Эйнштейн", "Нильс Бор"],
+            correct: 1
+        },
+        {
+            question: "2. Как называется принцип, согласно которому невозможно одновременно точно измерить положение и импульс частицы?",
+            options: ["Принцип неопределенности Гейзенберга", "Принцип соответствия", "Принцип суперпозиции", "Принцип неопределенности Шрёдингера"],
+            correct: 0
+        },
+        {
+            question: "3. Кто предложил теорию корпускулярно-волнового дуализма?",
+            options: ["Макс Планк", "Альберт Эйнштейн", "Луи де Бройль", "Нильс Бор"],
+            correct: 2
+        },
+        {
+            question: "4. Как называется элементарная частица, которая не имеет массы покоя?",
+            options: ["Электрон", "Фотон", "Протон", "Нейтрино"],
+            correct: 1
+        },
+        {
+            question: "5. Что такое квант?",
+            options: ["Наименьшая единица энергии", "Световая волна", "Частица материи", "Мощность света"],
+            correct: 0
+        },
+        {
+            question: "6. Кто развил теорию квантовой механики?",
+            options: ["Исаак Ньютон", "Нильс Бор", "Вернер Гейзенберг", "Макс Планк"],
+            correct: 2
+        },
+        {
+            question: "7. Как называется эффект, при котором фотоны могут выбивать электроны из вещества?",
+            options: ["Эффект Комптона", "Фотонный эффект", "Эффект Пирсона", "Эффект Шрёдингера"],
+            correct: 1
+        },
+        {
+            question: "8. Какой ученый предложил принцип неопределенности?",
+            options: ["Макс Планк", "Нильс Бор", "Вернер Гейзенберг", "Альберт Эйнштейн"],
+            correct: 2
+        },
+        {
+            question: "9. Кто ввел концепцию 'корпускулярно-волнового дуализма'?",
+            options: ["Нильс Бор", "Луи де Бройль", "Макс Планк", "Эрвин Шрёдингер"],
+            correct: 1
+        },
+        {
+            question: "10. Как называется математическое описание вероятности нахождения частицы?",
+            options: ["Волновая функция", "Равновесие", "Равенство энергии", "Энергетический спектр"],
+            correct: 0
+        },
+        {
+            question: "11. В чем заключается квантование энергии?",
+            options: ["Энергия излучения может принимать любые значения", "Энергия излучения может принимать только определенные значения", "Энергия излучения всегда фиксирована", "Энергия излучения зависит от температуры"],
+            correct: 1
+        },
+        {
+            question: "12. Какой принцип лежит в основе теории атома Бора?",
+            options: ["Энергия атома квантована", "Течение времени непрерывно", "Волны и частицы идентичны", "Свет и материя взаимодействуют"],
+            correct: 0
+        },
+        {
+            question: "13. Что такое квантовая запутанность?",
+            options: ["Частицы, связанные друг с другом на расстоянии", "Частицы, которые всегда в движении", "Два объекта с одинаковыми свойствами", "Частицы с одинаковым зарядом"],
+            correct: 0
+        },
+        {
+            question: "14. Какое значение имеет константа Планка?",
+            options: ["6.626 × 10^-34", "3.141", "1.602 × 10^-19", "2.998 × 10^8"],
+            correct: 0
+        },
+        {
+            question: "15. Что такое состояние суперпозиции в квантовой механике?",
+            options: ["Частица может находиться в нескольких состояниях одновременно", "Частица всегда в одном состоянии", "Частица в покое", "Частица всегда движется"],
+            correct: 0
+        }
+    ];
+
+    function loadQuestion() {
+        const questionData = questions[currentQuestionIndex];
+        const questionHTML = `
+            <p>${questionData.question}</p>
+            <ul class="answers">
+                ${questionData.options.map((option, index) => `
+                    <li><input type="radio" name="q${currentQuestionIndex}" value="${index}"> ${option}</li>
+                `).join('')}
+            </ul>
+        `;
+        document.getElementById('question-container').innerHTML = questionHTML;
+        startTimer();
+    }
+
+    function startTimer() {
+        let timeLeft = 10;
+        const timerElement = document.getElementById('timer');
+        const timerInterval = setInterval(() => {
+            timerElement.textContent = `Время: ${timeLeft} секунд`;
+            timeLeft--;
+
+            if (timeLeft < 0) {
+                clearInterval(timerInterval);
+                document.getElementById("time-up-sound").play(); // Воспроизведение звука по окончании времени
+                nextQuestion();
+            }
+        }, 1000);
+    }
+
+    function nextQuestion() {
+        const selectedOption = document.querySelector(`input[name="q${currentQuestionIndex}"]:checked`);
+        if (selectedOption && parseInt(selectedOption.value) === questions[currentQuestionIndex].correct) {
+            score++;
+            document.getElementById("correct-sound").play(); 
+        } else if (selectedOption) {
+            document.getElementById("incorrect-sound").play(); 
+        }
+
+        currentQuestionIndex++;
+
+        if (currentQuestionIndex < questions.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz').style.display = 'none';
+        document.getElementById('result').style.display = 'block';
+        document.getElementById('score').textContent = score;
+    }
+
+    loadQuestion();
+</script>
+
+</body>
+</html>
